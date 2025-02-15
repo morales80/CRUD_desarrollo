@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>CRUD Modal</title>
+    <style>
+        body {
+            background: url(https://wallpapers.com/images/hd/solid-background-bnrc4mk2xtq3kme5.jpg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .card-header {
+            background: rgba(0, 26, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 15px 15px 0 0;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+        }
+
+        label {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openModal('Crear Usuario')">Agregar Nuevo Registro</button>
+        <div class="row">
+            <div class="col-md-6">
+                <h4 class="text-center text-white">Base Relacional</h4>
+                <table class="table table-light table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Ejemplo Relacional</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openModal('Editar Usuario')">Editar</button>
+                                <button class="btn btn-danger btn-sm">Eliminar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h4 class="text-center text-white">Base No Relacional</h4>
+                <table class="table table-light table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Ejemplo No Relacional</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openModal('Editar Usuario')">Editar</button>
+                                <button class="btn btn-danger btn-sm">Eliminar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="modalLabel" >
+        <div class="modal-dialog">
+            <div class="modal-content card">
+                <div class="modal-header card-header">
+                    <h5 class="modal-title" id="modalLabel">Crear Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="textoid" class="form-label">Texto</label>
+                            <input type="text" id="textoid" class="form-control" placeholder="Ingresa un texto">
+                        </div>
+                        <div class="mb-3">
+                            <label for="paswordid" class="form-label">Password</label>
+                            <input type="password" id="paswordid" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fechaid" class="form-label">Fecha</label>
+                            <input type="date" id="fechaid" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="imgid" class="form-label">Imagen</label>
+                            <input type="file" id="imgid" class="form-control" accept=".jpg, .jpeg, .png">
+                        </div>
+                        <div class="mb-3">
+                            <label for="textolargoid" class="form-label">Texto largo</label>
+                            <textarea id="textolargoid" rows="4" class="form-control" placeholder="Escribe algo aquí..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" id="userForm" class="btn btn-primary" onclick="enviarDatos()">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function openModal(title) {
+            document.getElementById('modalLabel').textContent = title;
+        }
+    
+        async function enviarDatos() {
+            const nombre = document.getElementById('textoid').value;
+            const password = document.getElementById('paswordid').value;
+            const fecha = document.getElementById('fechaid').value;
+            const descripcion = document.getElementById('textolargoid').value;
+    
+            // Convertir la imagen a Base64
+            const imagenInput = document.getElementById('imgid').files[0];
+            let imagenBase64 = "";
+            if (imagenInput) {
+                const reader = new FileReader();
+                reader.readAsDataURL(imagenInput);
+                reader.onload = () => {
+                    imagenBase64 = reader.result;
+                    enviarDatosServidor(nombre, password, fecha, imagenBase64, descripcion);
+                };
+            } else {
+                enviarDatosServidor(nombre, password, fecha, imagenBase64, descripcion);
+            }
+        }
+    
+        async function enviarDatosServidor(nombre, password, fecha, imagen, descripcion) {
+            const datos = { nombre, password, fecha, imagen, descripcion };
+    
+            try {
+                const response = await fetch('http://localhost:5000/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+    
+                if (response.ok) {
+                    alert("✅ Registro exitoso");
+                    window.location.reload(); // Recargar la página para mostrar cambios
+                } else {
+                    alert("❌ Error al registrar");
+                }
+            } catch (error) {
+                console.error("❌ Error en la solicitud:", error);
+            }
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
