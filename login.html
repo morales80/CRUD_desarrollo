@@ -6,97 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Formulario Completo con Imagen y Fecha</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <style>
-        body {
-            background-color: rgba(17, 28, 125, 0.4);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-    
-        .container {
-            width: 90%;
-            max-width: 1200px;
-        }
-    
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-        }
-    
-        .card-header {
-            background: rgba(0, 26, 255, 0.3);
-            backdrop-filter: blur(10px);
-            border-radius: 15px 15px 0 0;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px;
-        }
-    
-        label {
-            color: white;
-        }
-    
-        .table {
-            margin-bottom: 30px;
-        }
-    
-        .mb-3 {
-            margin-bottom: 15px;
-        }
-    
-        /* Estilos para las tablas */
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-    
-        .table th, .table td {
-            padding: 12px 15px;
-            text-align: left;
-            color: white;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    
-        .table th {
-            background-color: rgba(0, 26, 255, 0.4);
-            font-weight: bold;
-        }
-    
-        .table-striped tbody tr:nth-child(odd) {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-    
-        .table-hover tbody tr:hover {
-            background-color: rgba(10, 33, 248, 0.2);
-            cursor: pointer;
-        }
-    
-        .table-bordered {
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-    
-        .table td {
-            color: black;
-        }
-    
-        .table th, .table td {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-    </style>
+    <link rel="stylesheet" href="./css/estilos.css">
     
     <body>
         <div class="container">
@@ -151,11 +61,11 @@
                     <form id="userForm">
                         <div class="mb-3">
                             <label for="textoid" class="form-label">Texto</label>
-                            <input type="text" id="textoid" class="form-control" placeholder="Ingresa un texto">
+                            <input type="text" id="textoid" class="form-control" placeholder="Ingresa un texto" required>
                         </div>
                         <div class="mb-3">
                             <label for="paswordid" class="form-label">Password</label>
-                            <input type="password" id="paswordid" class="form-control" placeholder="••••••••">
+                            <input type="password" id="paswordid" class="form-control" placeholder="••••••••" required>
                         </div>
                         <div class="mb-3">
                             <label for="textolargoid" class="form-label">Texto largo</label>
@@ -185,17 +95,17 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         let usuarioEditandoId = null;
-        let editandoRelacional = false; // mi variable para indicar el tipo de tabla que eastoy usando xd
+        let editandoRelacional = false; // mi variable para indicar el tipo de tabla que estoy usando xd
         const baseR = ('http://localhost:4000/')
         const baserNR = ('http://localhost:5000/')
-
+    
         function openModalRelacional(id) {
             openModal(id, true);
         }
-        
+    
         function openModalNoRelacional(id) {
             openModal(id, false);
         }
@@ -203,36 +113,37 @@
         function openModal(id, esRelacional) {
             document.getElementById('userForm').reset();
             usuarioEditandoId = id;
-            editandoRelacional = esRelacional; // Asigna el valor a la variable
-        
+            editandoRelacional = esRelacional;
+    
             if (id) {
                 document.getElementById('modalLabel').textContent = "Editar Usuario";
-        
+    
                 const url = esRelacional ? `${baseR}usuarios/${id}` : `${baserNR}api/users/${id}`;
                 console.log("URL solicitada", url);
-        
+    
                 fetch(url)
                     .then(response => {
                         if (!response.ok) {
-                            console.error("Error del servidor:", response.status, response.statusText); // Imprime el código de estado y el mensaje
-                            throw new Error(`Error ${response.status}: ${response.statusText}`); // Lanza un error con más detalles
+                            console.error("Error del servidor:", response.status, response.statusText);
+                            throw new Error(`Error ${response.status}: ${response.statusText}`);
                         }
                         return response.json();
                     })
                     .then(usuario => {
-                        console.log("Datos del usuario recibidos:", usuario);                        document.getElementById('textoid').value = usuario.nombre;
+                        console.log("Datos del usuario recibidos:", usuario);
+                        document.getElementById('textoid').value = usuario.nombre;
                         document.getElementById('paswordid').value = usuario.password;
                         document.getElementById('textolargoid').value = usuario.descripcion;
-                        document.getElementById('fechaid').value = usuario.fecha.substring(0, 10);
-        
+                        document.getElementById('fechaid').value = usuario.fecha ? usuario.fecha.substring(0, 10) : '';
+    
+                        const imgElement = document.getElementById('imagePreview');
                         if (usuario.imagen) {
-                            const imgElement = document.getElementById('imagePreview');
-                            imgElement.src = esRelacional ? `uploads/${usuario.imagen}` : usuario.imagen; // Ajusta la URL según el tipo de tabla
+                            imgElement.src = usuario.imagen; // URL completa para la base de datos No relacional
                             imgElement.style.display = 'block';
                         } else {
                             document.getElementById('imagePreview').style.display = 'none';
                         }
-        
+    
                         const modal = new bootstrap.Modal(document.getElementById('userModal'));
                         modal.show();
                     })
@@ -243,12 +154,12 @@
             } else {
                 document.getElementById('modalLabel').textContent = "Crear Usuario";
                 document.getElementById('imagePreview').style.display = 'none';
-        
+    
                 const modal = new bootstrap.Modal(document.getElementById('userModal'));
                 modal.show();
             }
         }
-        
+    
         async function enviarDatos() {
             const nombre = document.getElementById('textoid').value;
             const password = document.getElementById('paswordid').value;
@@ -256,69 +167,86 @@
             const fecha = document.getElementById('fechaid').value;
             const imagenInput = document.getElementById('imagenid').files[0];
             const switchEstado = document.getElementById('databaseSwitch').checked;
-        
+    
             if (!nombre || !password || !descripcion || !fecha) {
                 alert("❌ Todos los campos son obligatorios.");
                 return;
             }
-        
-            const reader = new FileReader();
-            reader.readAsDataURL(imagenInput || new Blob());
-            reader.onload = async function () {
-                const imagenBase64 = imagenInput ? reader.result : null;
-        
-                const datos = {
-                    nombre,
-                    password,
-                    descripcion,
-                    fecha,
-                    imagen: imagenBase64
-                };
-        
-                try {
-                    let response;
-                    let url;
-                    let method;
-        
-                    if (usuarioEditandoId) { // Si hay un ID, es una edición (PUT)
-                        url = editandoRelacional ? `${baseR}usuarios/${usuarioEditandoId}` : `${baserNR}api/users/${usuarioEditandoId}`;
-                        method = 'PUT';
-                    } else { // Si no hay ID, es una creación (POST)
-                        url = editandoRelacional ? `${baseR}submit` : `${baserNR}api/users`;
-                        method = 'POST';
-                    }
-        
-                    console.log("URL:", url); // Para depurar
-                    console.log("Método:", method); // Para depurar
-        
-                    response = await fetch(url, {
-                        method,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(datos)
-                    });
-        
-                    if (response.ok) {
-                        const mensaje = usuarioEditandoId ? "Usuario actualizado" : "Usuario registrado";
-                        alert(`✅ ${mensaje} exitosamente`);
-                        obtenerUsuarios();
-                        obtenerRegistros();
-                        document.getElementById('userForm').reset();
-                        $('#userModal').modal('hide');
-                        usuarioEditandoId = null; // Reiniciar usuarioEditandoId después de la operación
-                    } else {
-                        console.error("❌ Error al guardar los datos:", response.status, response.statusText);
-                        const errorData = await response.json();//Intenta parsear la respuesta del error
-                        alert(`❌ Error al guardar los datos: ${response.status} - ${response.statusText} - ${errorData?.message || 'Detalles no disponibles'}`); //Muestra un mensaje de error más descriptivo
-                    }
-                } catch (error) {
-                    console.error("❌ Error en la solicitud:", error);
-                    alert("❌ Ocurrió un error. Por favor, inténtalo de nuevo más tarde.");
+    
+            // Leer la imagen como Base64 solo para la base de datos No Relacional
+            let imagenBase64 = null;
+            if (!editandoRelacional && imagenInput) {
+                const reader = new FileReader();
+                reader.readAsDataURL(imagenInput);
+                await new Promise((resolve, reject) => {
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                });
+                imagenBase64 = reader.result;
+            }
+    
+            let url;
+            let method;
+            let body;
+            let headers = {};
+    
+            if (usuarioEditandoId) { // Si hay un ID, es una edición (PUT)
+                url = editandoRelacional ? `${baseR}usuarios/${usuarioEditandoId}` : `${baserNR}api/users/${usuarioEditandoId}`;
+                method = 'PUT';
+            } else { // Si no hay ID, es una creación (POST)
+                url = editandoRelacional ? `${baseR}submit` : `${baserNR}api/users`;
+                method = 'POST';
+            }
+    
+            if (editandoRelacional) {
+                // Si es la base de datos relacional, enviar como FormData
+                const formData = new FormData();
+                formData.append('nombre', nombre);
+                formData.append('password', password);
+                formData.append('descripcion', descripcion);
+                formData.append('fecha', fecha);
+                if (imagenInput) {
+                    formData.append('imagen', imagenInput);
                 }
-            };
+                body = formData;
+            } else {
+                // Si es la base de datos no relacional, enviar como JSON
+                body = JSON.stringify({
+                    nombre: nombre,
+                    password: password,
+                    descripcion: descripcion,
+                    fecha: fecha,
+                    imagen: imagenBase64 // Enviar la Base64
+                });
+                headers['Content-Type'] = 'application/json';
+            }
+    
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: headers,
+                    body: body
+                });
+    
+                if (response.ok) {
+                    const mensaje = usuarioEditandoId ? "Usuario actualizado" : "Usuario registrado";
+                    alert(`✅ ${mensaje} exitosamente`);
+                    obtenerUsuarios();
+                    obtenerRegistros();
+                    document.getElementById('userForm').reset();
+                    $('#userModal').modal('hide');
+                    usuarioEditandoId = null;
+                } else {
+                    console.error("Error al guardar los datos:", response.status, response.statusText);
+                    const errorData = await response.json();
+                    alert(`Error al guardar los datos: ${response.status} - ${response.statusText} - ${errorData?.message || 'Detalles no disponibles'}`);
+                }
+            } catch (error) {
+                console.error("Error en la solicitud:", error);
+                alert("Ocurrió un error. Por favor, inténtalo de nuevo más tarde.");
+            }
         }
-        
+    
         async function obtenerRegistros() {
             try {
                 const response = await fetch(`${baserNR}api/users`);
@@ -338,14 +266,14 @@
                         <td>${registro.descripcion}</td>
                         <td><img src="${registro.imagen}" alt="Imagen" width="50"></td>
                         <td>
-                            <button class="btn btn-warning" onclick="openModal('${registro._id}')">Editar</button>
-                            <button class="btn btn-danger" onclick="eliminarUsuario('${registro._id}', false)">Eliminar</button> 
+                            <button class="btn btn-outline-warning" onclick="openModalNoRelacional('${registro._id}')">Editar</button>
+                            <button class="btn btn-outline-danger" onclick="eliminarUsuario('${registro._id}', false)">Eliminar</button>
                         </td>
                     </tr>`;
                     document.getElementById('noRelacionalTable').insertAdjacentHTML('beforeend', row);
                 });
             } catch (error) {
-                console.error("❌ Error al obtener los registros:", error);
+                console.error("Error al obtener los registros:", error);
             }
         }
     
@@ -388,7 +316,7 @@
         function mostrarUsuarios(usuarios) {
             const tabla = document.getElementById("tabla-usuarios");
             tabla.innerHTML = "";
-        
+    
             usuarios.forEach(usuario => {
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
@@ -398,15 +326,15 @@
                     <td><img src="uploads/${usuario.imagen}" alt="Imagen" width="50" height="50"></td>
                     <td>${usuario.descripcion}</td>
                     <td>
-                        <button onclick="eliminarUsuario(${usuario.id}, true)">Eliminar</button>
-                        <button onclick="openModalRelacional(${usuario.id})">Editar</button> 
+                        <button class="btn btn-outline-danger" onclick="eliminarUsuario(${usuario.id}, true)">Eliminar</button>
+                        <button class="btn btn-outline-primary onclick="openModalRelacional(${usuario.id})">Editar</button>
                     </td>
                 `;
                 tabla.appendChild(fila);
             });
         }
-
-        async function editarUsuario(id){
+    
+        async function editarUsuario(id) {
             openModalRelacional(id);
         }
     
@@ -414,40 +342,15 @@
             obtenerRegistros();
             obtenerUsuarios();
         };
-        async function editarUsuario(id) {
-            try {
-                const response = await fetch(`${baseR}usuarios/${id}`);
-                const usuario = await response.json();
-        
-                openModal(usuario.id);
-        
-                document.getElementById('textoid').value = usuario.nombre;
-                document.getElementById('paswordid').value = usuario.password;
-                document.getElementById('textolargoid').value = usuario.descripcion;
-                document.getElementById('fechaid').value = usuario.fecha;
-        
-                if (usuario.imagen) {
-                    const imgElement = document.getElementById('imagePreview');
-                    imgElement.src = `uploads/${usuario.imagen}`;
-                    imgElement.style.display = 'block';
-                } else {
-                    document.getElementById('imagePreview').style.display = 'none';
-                }
-        
-                usuarioEditandoId = id;
-                document.getElementById('modalLabel').textContent = "Editar Usuario";
-            } catch (error) {
-                console.error("Error al obtener el usuario:", error);
-            }
-        }
     
         document.getElementById('databaseSwitch').addEventListener('change', function () {
             const label = document.querySelector('label[for="databaseSwitch"]');
             label.textContent = this.checked ? "Base Relacional" : "Base No Relacional";
-            editandoRelacional = this.checked; // <-- Asegúrate de que esta línea esté presente
-            console.log("editandoRelacional:", editandoRelacional); // <-- Para depurar
+            editandoRelacional = this.checked;
+            console.log("editandoRelacional:", editandoRelacional);
         });
     </script>
+    
         
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

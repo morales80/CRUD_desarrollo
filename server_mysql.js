@@ -1,17 +1,23 @@
 const express = require("express");
 const mysql = require("mysql");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 const multer = require("multer");
 const bcrypt = require("bcrypt");
+const fs = require('fs');
+const path = require('path');
 
 // Crear una instancia de Express
 const app = express();
 const port = 4000;
 
 app.use(cors());
-app.use(express.json());
-app.use(bodyParser.json());
+app.use(express.json()); // Usar solo express.json()
+
+// Crear la carpeta "uploads" si no existe xd
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)){
+    fs.mkdirSync(uploadsDir);
+}
 
 // Configurar almacenamiento de imágenes con Multer
 const storage = multer.diskStorage({
@@ -19,7 +25,9 @@ const storage = multer.diskStorage({
         cb(null, "uploads/"); // Carpeta donde se guardarán las imágenes
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
+        const filename = Date.now() + "-" + file.originalname;
+        console.log("Ruta de la imagen guardada:", path.join(__dirname, 'uploads', filename));
+        cb(null, filename);
     }
 });
 const upload = multer({ storage });
@@ -60,6 +68,7 @@ app.post("/submit", upload.single("imagen"), async (req, res) => {
             }
         });
     } catch (error) {
+        console.error("Error en el servidor:", error);
         res.status(500).json({ message: "Error en el servidor" });
     }
 });
@@ -78,7 +87,6 @@ app.get("/usuarios/:id", (req, res) => {
         }
     });
 });
-
 
 // Obtener usuarios
 app.get("/usuarios", (req, res) => {
@@ -112,69 +120,54 @@ app.put("/usuarios/:id", upload.single("imagen"), async (req, res) => {
     const { id } = req.params;
     const { nombre, password, fecha, descripcion } = req.body;
     const imagen = req.file ? req.file.filename : null;
-    let updatedFields = [];
 
-    let query = "UPDATE usuarios SET ";
+    try {
+        let query = "UPDATE usuarios SET ";
+        const updates = [];
+        const values = [];
 
-    if (nombre) {
-        query += "nombre = ?, ";
-        updatedFields.push(nombre);
-    }
-
-    if (password) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        query += "password = ?, ";
-        updatedFields.push(hashedPassword);
-    }
-
-    if (fecha) {
-        query += "fecha = ?, ";
-        updatedFields.push(fecha);
-    }
-
-    if (descripcion) {
-        query += "descripcion = ?, ";
-        updatedFields.push(descripcion);
-    }
-
-    if (imagen) {
-        query += "imagen = ?, ";
-        updatedFields.push(imagen);
-    }
-
-    query = query.slice(0, -2);
-    query += " WHERE id = ?";
-
-    updatedFields.push(id);
-
-    db.beginTransaction(err => { // Iniciar transacción
-        if (err) {
-            console.error("Error al iniciar transacción:", err.stack);
-            return res.status(500).json({ message: "Error al actualizar los datos" });
+        if (nombre) {
+            updates.push("nombre = ?");
+            values.push(nombre);
+        }
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updates.push("password = ?");
+            values.push(hashedPassword);
+        }
+        if (fecha) {
+            updates.push("fecha = ?");
+            values.push(fecha);
+        }
+        if (descripcion) {
+            updates.push("descripcion = ?");
+            values.push(descripcion);
+        }
+        if (imagen) {
+            updates.push("imagen = ?");
+            values.push(imagen);
         }
 
-        db.query(query, updatedFields, (err, result) => {
+        if (updates.length === 0) {
+            return res.status(400).json({ message: "No hay campos para actualizar" });
+        }
+
+        query += updates.join(", ");
+        query += " WHERE id = ?";
+        values.push(id);
+
+        db.query(query, values, (err, result) => {
             if (err) {
-                return db.rollback(() => { // Revertir transacción en caso de error
-                    console.error("Error al actualizar los datos:", err.stack);
-                    res.status(500).json({ message: "Error al actualizar los datos" });
-                });
+                console.error("Error al actualizar usuario:", err);
+                return res.status(500).json({ message: "Error al actualizar usuario" });
             }
-
-            db.commit(err => { // Confirmar transacción
-                if (err) {
-                    return db.rollback(() => {
-                        console.error("Error al confirmar transacción:", err.stack);
-                        res.status(500).json({ message: "Error al actualizar los datos" });
-                    });
-                }
-
-                res.status(200).json({ message: "Usuario actualizado correctamente" });
-            });
+            res.status(200).json({ message: "Usuario actualizado correctamente" });
         });
-    });
+    } catch (error) {
+        console.error("Error en el servidor:", error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
 });
-
 
 // Iniciar el servidor
 app.listen(port, () => {

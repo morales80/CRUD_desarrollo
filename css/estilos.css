@@ -1,0 +1,88 @@
+        body {
+            background-color: rgba(17, 28, 125, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+    
+        .container {
+            width: 90%;
+            max-width: 1200px;
+        }
+    
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+        }
+    
+        .card-header {
+            background: rgba(0, 26, 255, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 15px 15px 0 0;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+        }
+    
+        label {
+            color: white;
+        }
+    
+        .table {
+            margin-bottom: 30px;
+        }
+    
+        .mb-3 {
+            margin-bottom: 15px;
+        }
+    
+        /* Estilos para las tablas */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    
+        .table th {
+            background-color: rgba(0, 26, 255, 0.4);
+            font-weight: bold;
+        }
+    
+        .table-striped tbody tr:nth-child(odd) {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    
+        .table-hover tbody tr:hover {
+            background-color: rgba(10, 33, 248, 0.2);
+            cursor: pointer;
+        }
+    
+        .table-bordered {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    
+        .table td {
+            color: black;
+        }
+    
+        .table th, .table td {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
