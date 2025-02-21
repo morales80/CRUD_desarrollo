@@ -2,7 +2,6 @@ const express = require("express");
 const mysql = require("mysql");
 const cors = require("cors");
 const multer = require("multer");
-const bcrypt = require("bcrypt");
 const fs = require('fs');
 const path = require('path');
 
@@ -54,12 +53,9 @@ app.post("/submit", upload.single("imagen"), async (req, res) => {
     const imagen = req.file ? req.file.filename : null;
 
     try {
-        // Encriptar la contraseña antes de guardarla
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         const query =
             "INSERT INTO usuarios (nombre, password, fecha, imagen, descripcion) VALUES (?, ?, ?, ?, ?)";
-        db.query(query, [nombre, hashedPassword, fecha, imagen, descripcion], (err, result) => {
+        db.query(query, [nombre, password, fecha, imagen, descripcion], (err, result) => {
             if (err) {
                 console.error("Error al insertar los datos:", err);
                 res.status(500).json({ message: "Error al guardar los datos" });
@@ -131,9 +127,8 @@ app.put("/usuarios/:id", upload.single("imagen"), async (req, res) => {
             values.push(nombre);
         }
         if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
             updates.push("password = ?");
-            values.push(hashedPassword);
+            values.push(password);
         }
         if (fecha) {
             updates.push("fecha = ?");
